@@ -7,6 +7,7 @@
 #include "spt-serverplugin.hpp"
 #include "..\sptlib-wrapper.hpp"
 #include "..\utils\ent_utils.hpp"
+#include "..\utils\math.hpp"
 #include "..\utils\string_parsing.hpp"
 #include "custom_interfaces.hpp"
 #include "cvars.hpp"
@@ -46,7 +47,6 @@ inline bool FStrEq(const char* sz1, const char* sz2)
 // Interfaces from the engine
 std::unique_ptr<EngineClientWrapper> engine;
 IVEngineServer* engine_server = nullptr;
-IUniformRandomStream* random = nullptr;
 IMatSystemSurface* surface = nullptr;
 vgui::ISchemeManager* scheme = nullptr;
 void* gm = nullptr;
@@ -203,6 +203,17 @@ bool DoesGameLookLikeDMoMM()
 	return false;
 }
 
+bool DoesGameLookLikeHLS()
+{
+	if (g_pCVar)
+	{
+		if (g_pCVar->FindVar("hl1_ref_db_distance"))
+			return true;
+	}
+
+	return false;
+}
+
 bool FoundEngineServer()
 {
 	return (engine_server != nullptr);
@@ -314,12 +325,6 @@ bool CSourcePauseTool::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceF
 	if (!engine_server)
 	{
 		DevWarning("SPT: Failed to get the IVEngineServer interface.\n");
-	}
-
-	random = (IUniformRandomStream*)interfaceFactory(VENGINE_CLIENT_RANDOM_INTERFACE_VERSION, NULL);
-	if (!random)
-	{
-		DevWarning("SPT: Failed to get the IUniformRandomStream interface.\n");
 	}
 
 #ifndef OE
@@ -552,15 +557,7 @@ CON_COMMAND(y_spt_cvar_random, "Randomize CVar value.")
 	float min = std::stof(args.Arg(2));
 	float max = std::stof(args.Arg(3));
 
-	int t = time(NULL);
-
-	if (lastSeed != t)
-	{
-		random->SetSeed(t);
-		lastSeed = t;
-	}
-
-	float r = random->RandomFloat(min, max);
+	float r = utils::RandomFloat(min, max);
 	cvar->SetValue(r);
 }
 

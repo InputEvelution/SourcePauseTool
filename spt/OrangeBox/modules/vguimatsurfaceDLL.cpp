@@ -508,9 +508,9 @@ void VGui_MatSurfaceDLL::DrawTopHUD(vrect_t* screen, vgui::IScheme* scheme, IMat
 
 	if (y_spt_hud_oob.GetBool())
 	{
-		Vector v = clientDLL.GetPlayerEyePos();
+		Vector v = clientDLL.GetCameraOrigin();
 		trace_t tr;
-		Strafe::TracePlayer(tr, v, v + Vector(1, 1, 1), Strafe::HullType::POINT);
+		Strafe::Trace(tr, v, v + Vector(1, 1, 1));
 
 		bool oob = engineDLL.ORIG_CEngineTrace__PointOutsideWorld(nullptr, 0, v) && !tr.startsolid;
 		swprintf_s(buffer, BUFFER_SIZE, L"oob: %d", oob);

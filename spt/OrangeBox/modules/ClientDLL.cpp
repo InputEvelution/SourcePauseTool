@@ -153,7 +153,7 @@ void ClientDLL::Hook(const std::wstring& moduleName,
 	m_Name = moduleName;
 	m_Base = moduleBase;
 	m_Length = moduleLength;
-	uintptr_t ORIG_MiddleOfCAM_Think, ORIG_CHLClient__CanRecordDemo;
+	uintptr_t ORIG_MiddleOfCAM_Think, ORIG_CHLClient__CanRecordDemo, ORIG_CHudDamageIndicator__GetDamagePosition;
 
 	patternContainer.Init(moduleName);
 
@@ -173,6 +173,7 @@ void ClientDLL::Hook(const std::wstring& moduleName,
 	DEF_FUTURE(UTIL_TraceRay);
 	DEF_FUTURE(CGameMovement__CanUnDuckJump);
 	DEF_FUTURE(CViewEffects__Fade);
+	DEF_FUTURE(CHudDamageIndicator__GetDamagePosition);
 
 	GET_HOOKEDFUTURE(HudUpdate);
 	GET_HOOKEDFUTURE(GetButtonBits);
@@ -190,6 +191,16 @@ void ClientDLL::Hook(const std::wstring& moduleName,
 	GET_FUTURE(UTIL_TraceRay);
 	GET_FUTURE(CGameMovement__CanUnDuckJump);
 	GET_HOOKEDFUTURE(CViewEffects__Fade);
+	GET_FUTURE(CHudDamageIndicator__GetDamagePosition);
+
+	if (DoesGameLookLikeHLS())
+	{
+		sizeofCUserCmd = 84 - sizeof(CUtlVector<int>);
+	}
+	else
+	{
+		sizeofCUserCmd = 84;
+	}
 
 	if (ORIG_DoImageSpaceMotionBlur)
 	{
@@ -439,6 +450,13 @@ void ClientDLL::Hook(const std::wstring& moduleName,
 		DevMsg("[client.dll] Found GetClientModeNormal at %p\n", ORIG_GetClientModeNormal);
 	}
 
+	if (ORIG_CHudDamageIndicator__GetDamagePosition)
+	{
+		int offset = *reinterpret_cast<int*>(ORIG_CHudDamageIndicator__GetDamagePosition + 4);
+		ORIG_MainViewOrigin = (_MainViewOrigin)(offset + ORIG_CHudDamageIndicator__GetDamagePosition + 8);
+		DevMsg("[client.dll] Found MainViewOrigin at %p\n", ORIG_MainViewOrigin);
+	}
+
 	extern bool FoundEngineServer();
 	if (ORIG_CreateMove && ORIG_GetGroundEntity && ORIG_CalcAbsoluteVelocity && ORIG_GetLocalPlayer
 	    && ORIG_GetButtonBits && _sv_airaccelerate && _sv_accelerate && _sv_friction && _sv_maxspeed
@@ -465,6 +483,9 @@ void ClientDLL::Hook(const std::wstring& moduleName,
 	if (!ORIG_CViewEffects__Fade)
 		Warning("y_spt_disable_fade 1 not available\n");
 
+	if (!ORIG_MainViewOrigin || !ORIG_UTIL_TraceRay)
+		Warning("y_spt_hud_oob 1 has no effect\n");
+
 	patternContainer.Hook();
 }
 
@@ -489,6 +510,7 @@ void ClientDLL::Clear()
 	ORIG_CViewRender__RenderView = nullptr;
 	ORIG_CViewRender__Render = nullptr;
 	ORIG_UTIL_TraceRay = nullptr;
+	ORIG_MainViewOrigin = nullptr;
 
 	pgpGlobals = nullptr;
 	off1M_nOldButtons = 0;
@@ -683,6 +705,13 @@ Vector ClientDLL::GetPlayerEyePos()
 	}
 
 	return rval;
+}
+
+Vector ClientDLL::GetCameraOrigin()
+{
+	if (!ORIG_MainViewOrigin)
+		return Vector();
+	return ORIG_MainViewOrigin();
 }
 
 int ClientDLL::GetPlayerFlags()
@@ -886,7 +915,7 @@ int __fastcall ClientDLL::HOOKED_GetButtonBits_Func(void* thisptr, int edx, int 
 
 bool DoAngleChange(float& angle, float target)
 {
-	float normalizedDiff = NormalizeDeg(target - angle);
+	float normalizedDiff = utils::NormalizeDeg(target - angle);
 	if (std::abs(normalizedDiff) > _y_spt_anglesetspeed.GetFloat())
 	{
 		angle += std::copysign(_y_spt_anglesetspeed.GetFloat(), normalizedDiff);
@@ -1054,7 +1083,7 @@ void __fastcall ClientDLL::HOOKED_CreateMove_Func(void* thisptr,
                                                   bool active)
 {
 	auto m_pCommands = *reinterpret_cast<uintptr_t*>(reinterpret_cast<uintptr_t>(thisptr) + offM_pCommands);
-	pCmd = m_pCommands + 84 * (sequence_number % 90);
+	pCmd = m_pCommands + sizeofCUserCmd * (sequence_number % 90);
 
 	ORIG_CreateMove(thisptr, edx, sequence_number, input_sample_frametime, active);
 
@@ -1106,9 +1135,9 @@ void ClientDLL::HOOKED_CViewRender__Render_Func(void* thisptr, int edx, void* re
 	ORIG_CViewRender__Render(thisptr, edx, rect);
 #else
 	renderingOverlay = false;
+	screenRect = rect;
 	if (!g_OverlayRenderer.shouldRenderOverlay())
 	{
-		screenRect = rect;
 		ORIG_CViewRender__Render(thisptr, edx, rect);
 	}
 	else

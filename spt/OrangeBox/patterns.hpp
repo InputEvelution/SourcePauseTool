@@ -231,9 +231,12 @@ namespace patterns
 		    "83 EC 38 56 8B F1 8B 0D ?? ?? ?? ?? D9 41 28 57 D8 1D ?? ?? ?? ?? DF E0 F6 C4 05 7A 35 A1 ?? ?? ?? ?? D9 40 28 8B 0D",
 		    "missinginfo1_4_7",
 		    "55 8B EC 83 EC 24 89 4D E0 B9 ?? ?? ?? ?? E8 ?? ?? ?? ?? D8 1D ?? ?? ?? ?? DF E0 F6 C4 05 7A 5A");
-		PATTERNS(CViewRender__RenderView,
-		         "5135",
-		         "55 8B EC 83 E4 F8 81 EC 24 01 00 00 53 56 57 8B F9 8D 8F 20 01 00 00 89 7C 24 24 E8");
+		PATTERNS(
+		    CViewRender__RenderView,
+		    "5135",
+		    "55 8B EC 83 E4 F8 81 EC 24 01 00 00 53 56 57 8B F9 8D 8F 20 01 00 00 89 7C 24 24 E8",
+		    "3420",
+		    "55 8B EC 83 E4 F8 81 EC 24 01 00 00 53 8B 5D 08 56 57 8B F9 8D 8F 94 00 00 00 53 89 7C 24 28 89 4C 24 34 E8");
 		PATTERNS(
 		    CViewRender__Render,
 		    "5135",
@@ -254,11 +257,17 @@ namespace patterns
 		PATTERNS(
 		    UTIL_TraceRay,
 		    "5135",
-		    "8B 44 24 10 8B 4C 24 0C 83 EC 10 56 6A 00 50 51 8D 4C 24 10 E8 ?? ?? ?? ?? 8B 74 24 28 8B 0D ?? ?? ?? ?? 8B 11 8B 52 10");
+		    "8B 44 24 10 8B 4C 24 0C 83 EC 10 56 6A 00 50 51 8D 4C 24 10 E8 ?? ?? ?? ?? 8B 74 24 28 8B 0D ?? ?? ?? ?? 8B 11 8B 52 10",
+		    "3420",
+		    "8B 44 24 10 8B 4C 24 0C 83 EC 0C 56 50 51 8D 4C 24 0C E8 ?? ?? ?? ?? 8B 74 24 24 8B 0D ?? ?? ?? ?? 8B 11 8B 52 10");
 		PATTERNS(
 		    CViewEffects__Fade,
 		    "dmomm",
 		    "51 56 6A 14 8B F1 E8 ?? ?? ?? ?? 8B 54 24 10 8B C8 0F B7 02 89 44 24 10 83 C4 04 89 4C 24 04 DB 44 24 0C");
+		PATTERNS(
+		    CHudDamageIndicator__GetDamagePosition,
+		    "5135",
+		    "83 EC 18 E8 ?? ?? ?? ?? e8 ?? ?? ?? ?? 8B 08 89 4C 24 0C 8B 50 04 6A 00 89 54 24 14 8B 40 08 6A 00 8D 4C 24 08 51 8D 54 24 18 52 89 44 24 24");
 	} // namespace client
 
 	namespace server
