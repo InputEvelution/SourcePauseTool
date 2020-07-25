@@ -309,7 +309,9 @@ namespace patterns
 		    "missinginfo1_4_7",
 		    "55 8B EC 83 EC 44 56 89 4D D0 8B 45 D0 8B 48 08 81 C1 ?? ?? ?? ?? E8 ?? ?? ?? ?? 0F B6 C8 85 C9",
 		    "missinginfo1_6",
-		    "55 8B EC 83 EC 1C 56 8B F1 8B 4E 04 80 B9 ?? ?? ?? ?? ?? 74 0E 8B 76 08 83 4E 28 02 32 C0 5E 8B E5");
+		    "55 8B EC 83 EC 1C 56 8B F1 8B 4E 04 80 B9 ?? ?? ?? ?? ?? 74 0E 8B 76 08 83 4E 28 02 32 C0 5E 8B E5",
+		    "hl2mp-5344925",
+		    "55 8B EC 83 EC 18 56 8B F1 8B 4E 04 80 B9 ?? ?? ?? ?? ?? 74 0E 8B 46 08 83 48 28 02 32 C0 5E 8B E5");
 		PATTERNS(
 		    FinishGravity,
 		    "bms",
